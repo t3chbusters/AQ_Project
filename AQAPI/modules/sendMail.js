@@ -1,32 +1,36 @@
 var nodemailer = require('nodemailer');
-
+require('dotenv').config();
 var transporter = nodemailer.createTransport({
   secure: true,
-  host: 'smtp.gmail.com',
-  port: 465,
+  host: process.env.SMTPHOST,
+  port: process.env.SMTPPORT,
   auth: {
-    user: '3r4rss@gmail.com',
-    pass: 'ipvrfwbtvhentzrv'
+    user: process.env.SMTPUSER,
+    pass: process.env.SMTPPW
   }
 });
 
 var mailOptions = {
-  from: '3r4rss@gmail.com',
-  to: 'raghunadhpstays@gmail.com; ',
+  from: process.env.SMTPUSER,
+  to: '',
   subject: 'Email From Node.js',
-  text: 'test mail easy!',
-  html: '<a href="http://localhost:3000/testing" class="rbl">Click here</a>'
+  // text: 'test mail easy!',
+  html: '<a href="http://localhost:3000/verify" class="rbl">Activate here</a>'
 };
 
-const testMail = (email, username, passcode) => {
-    transporter.sendMail(mailOptions, function(error, info){
-    if (error) {
+const testMail = (user) => {
+  return new Promise((resolve, reject) => {
+    mailOptions.to = user.email;
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
         console.log(error);
-    } else {
+        reject({ msg: error });
+      } else {
         console.log('Email sent: ' + info.response);
-    }
+        resolve({ msg: 'success' });
+      }
     });
-    console.log(`email: ${email}; username: ${username}; passcode: ${passcode}`);
+  })
 }
 
-module.exports = {testMail};
+module.exports = { testMail };
