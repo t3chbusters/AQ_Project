@@ -11,12 +11,13 @@ const UserSchema = Joi.object({
 
 router.get('/', async (req, res) => {
     let userDetails = req.body;
-    // validation needed---
+    let validateResult = UserSchema.validate(userDetails);
+    console.log(validateResult);
     // db insertion functionality...
-    let r = await dbOps(userDetails);
+    let r = await dbOps.pushUser(userDetails);
     console.log(r);
     //mail sending process...
-    let result = await mail.testMail(userDetails);
+    let result = await mail.sendMail(userDetails);
     if (result.msg = 'success') {
         res.send('Mail Sent for Activation');
     } else {
