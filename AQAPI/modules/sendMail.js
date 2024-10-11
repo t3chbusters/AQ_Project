@@ -1,5 +1,6 @@
 var nodemailer = require('nodemailer');
 require('dotenv').config();
+const {validation} = require('../utils/validation');
 
 var transporter = nodemailer.createTransport({
   secure: true,
@@ -19,26 +20,25 @@ var mailOptions = {
   html: ''
 };
 
-const htmlTemplate = `
-    <h4>Dear Raghunadh,</h4>
-    <p>We have received the request from you for registering into the website of ABC.com.</p>
-    <p>Thanks for showing interesting to subscribe. To activate your email id to receive more information, please click below button.</p>
-
-    <a href="http://localhost:3000/verify/search?search="${Buffer.from(user.email).toString('base64')} class="rbl">Activate here</a>
-`;
-
 const sendMail = (user) => {
   return new Promise((resolve, reject) => {
+    const htmlTemplate = `
+        <h4>Dear Raghunadh,</h4>
+        <p>We have received the request from you for registering into the website of ABC.com.</p>
+        <p>Thanks for showing interesting to subscribe. To activate your email id to receive more information, please click below button.</p>
+    
+        <a href="http://localhost:3000/verify/search?search="${Buffer.from(user.email).toString('base64')} class="rbl">Activate here</a>
+    `;
     mailOptions.to = user.email;
     mailOptions.html = htmlTemplate;
-    console.log(mailOptions.html);
-    transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-        reject({ msg: error });
+    transporter.sendMail(mailOptions, function (err, info) {
+      if (err) {
+        let errors = {};
+        errors.error = err.message;
+        reject(validation(errors));
       } else {
-        console.log('Email sent: ' + info.response);
-        resolve({ msg: 'success' });
+        let sentTo = info.accepted[0];
+        resolve(validation(sentTo));
       }
     });
   })

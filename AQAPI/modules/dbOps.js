@@ -1,4 +1,5 @@
 const knex = require('knex');
+const {validation} = require('../utils/validation');
 
 const kDB = knex({
     client: 'mysql2',
@@ -13,37 +14,57 @@ const kDB = knex({
 
 const pushUser = (user) => {
     return new Promise(async (resolve, reject) => {
-        console.log(user);
-        let r = await kDB('USER_ACTIVATION').insert({ USERNAME: user.username, PASSCODE: Buffer.from(user.passcode).toString('base64'), EMAIL: user.email, USERSTATUS: 'PENDING', CREATEDON: new Date() });
-        console.log(r[0]);
-        if (r[0]) {
-            resolve({ msg: 'pushed the user' });
-        } else {
-            reject({ msg: r });
+        let dbResponse = {};
+        try{
+            let result = await kDB('USER_ACTIVATION').insert({USERNAME: user.username, PASSCODE: Buffer.from(user.passcode).toString('base64'), EMAIL: user.email, USERSTATUS: 'PENDING', CREATEDON: new Date() });
+            if (result.error) {
+                dbResponse.error = 'User not added';
+                reject(validation(dbResponse));
+            } else {
+                dbResponse = 'User Added';
+                resolve(validation(dbResponse));
+            }
+        } catch(err){
+            dbResponse.error = err.sqlMessage;
+            reject(validation(dbResponse));
         }
     })
 }
 
 const getUser = (email) => {
     return new Promise(async (resolve, reject) => {
-        let result = await kDB('USER_ACTIVATION').where({EMAIL: email});
-        // console.log(result);
-        if(result[0]){
-            resolve({msg: result[0]});
-        }else{
-            reject({msg: 'not found'});
+        let dbResponse = {};
+        try{
+            let result = await kDB('USER_ACTIVATION').where({EMAIL: email});
+            if (result.error || result.length == 0) {
+                dbResponse.error = 'User Not Found';
+                reject(validation(dbResponse));
+            } else {
+                dbResponse = 'User Found';
+                resolve(validation(result));
+            }
+        }catch(err){
+            dbResponse.error = err.sqlMessage;
+            reject(validation(dbResponse));
         }
     })
 }
 
 const updateUser = (email) => {
     return new Promise(async(resolve, reject) => {
-        let result = await kDB('USER_ACTIVATION').where({EMAIL: email}).update({USERSTATUS: 'Active'});
-        console.log(result);
-        if(result){
-            resolve({msg: 'activated'});
-        }else{
-            reject({msg: result});
+        let dbResponse = {};
+        try{
+            let result = await kDB('USER_ACTIVATION').where({EMAIL: email}).update({USERSTATUS: 'Active'});
+            if (result.error) {
+                dbResponse.error = 'Activation Pending';
+                reject(validation(dbResponse));
+            } else {
+                dbResponse = 'User Activated';
+                resolve(validation(dbResponse));
+            }
+        }catch(err){
+            dbResponse.error = err.sqlMessage;
+            reject(validation(dbResponse));          
         }
     })
 }

@@ -1,4 +1,4 @@
-const validate = (result) => {
+const validation = (result) => {
     let resultObj = {
         msg: '',
         error: true
@@ -11,4 +11,4 @@ const validate = (result) => {
     }
     return resultObj;
 }
-module.exports = validate;
+module.exports = {validation};
