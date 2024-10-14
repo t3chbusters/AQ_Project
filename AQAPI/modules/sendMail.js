@@ -1,6 +1,6 @@
 var nodemailer = require('nodemailer');
 require('dotenv').config();
-const {validation} = require('../utils/validation');
+const { validation } = require('../utils/validation');
 
 var transporter = nodemailer.createTransport({
   secure: true,
@@ -23,11 +23,11 @@ var mailOptions = {
 const sendMail = (user) => {
   return new Promise((resolve, reject) => {
     const htmlTemplate = `
-        <h4>Dear Raghunadh,</h4>
-        <p>We have received the request from you for registering into the website of ABC.com.</p>
+        <h4>Dear ${user.username}(${user.email}),</h4>
+        <p>We have received the request from you(${user.username}) for registering into the website of Alergia-Quest.com.</p>
         <p>Thanks for showing interesting to subscribe. To activate your email id to receive more information, please click below button.</p>
     
-        <a href="http://localhost:3000/verify/search?search="${Buffer.from(user.email).toString('base64')} class="rbl">Activate here</a>
+        <a href="http://localhost:3000/verify/search?search=${Buffer.from(user.email).toString('base64')}" class="rbl">Activate here</a>
     `;
     mailOptions.to = user.email;
     mailOptions.html = htmlTemplate;
